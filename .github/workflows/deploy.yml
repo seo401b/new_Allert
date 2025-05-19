@@ -38,7 +38,7 @@ jobs:
 
     - name: Deploy to Cloud Run
       run: |
-        gcloud run deploy Allert \
+        gcloud run deploy-allert \
           --source . \
           --region asia-northeast3 \
           --platform managed \
