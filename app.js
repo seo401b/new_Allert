@@ -28,7 +28,7 @@ const upload = multer({
 });
 
 app.get("/", (req, res) => {
-  res.send("✅ Allert 백엔드가 실행 중입니다.");
+  res.send("Allert 백엔드가 실행 중입니다.");
 });
 
 // 이미지 분석 API
@@ -63,5 +63,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ 서버 실행 중: http://localhost:${PORT}`);
+  console.log(`서버 실행 중: http://localhost:${PORT}`);
 });
