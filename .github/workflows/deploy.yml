@@ -1,0 +1,45 @@
+name: Deploy Node.js App to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Optional Build Step
+      run: |
+        if [ -f package.json ] && grep -q '"build"' package.json; then
+          npm run build
+        else
+          echo "No build step found, skipping..."
+        fi
+
+    - name: Install Google Cloud CLI
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: central-accord-456812-j6
+        service_account_key: ${{ secrets.GCP_KEY_JSON }}
+        export_default_credentials: true
+
+    - name: Deploy to Cloud Run
+      run: |
+        gcloud run deploy Allert \
+          --source . \
+          --region asia-northeast3 \
+          --platform managed \
+          --allow-unauthenticated
