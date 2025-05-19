@@ -11,13 +11,17 @@ const { analyzeFullImage } = require("./utils/analyzeUtils");
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors({origin: "*"})); // !!!! 배포 시에 특정 도메인만 !!!!
 app.use(bodyParser.json({ limit: "50mb" }));
 
 // 업로드 폴더 설정
 const upload = multer({ dest: "uploads/" });
+
+app.get("/", (req, res) => {
+  res.send("✅ Allert 백엔드가 실행 중입니다.");
+});
 
 // 이미지 업로드 엔드포인트
 app.post("/analyze-image", upload.single("image"), async (req, res) => {
