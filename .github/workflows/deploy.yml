@@ -3,7 +3,11 @@ name: Deploy to Cloud Run
 on:
   push:
     branches:
-      - main  # main 브랜치에 push될 때 배포 실행
+      - main
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   deploy:
@@ -13,16 +17,19 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
-    - name: Set up Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
       with:
-        service_account_key: ${{ secrets.GCP_KEY_JSON }}
-        project_id: central-accord-456812-j6 
-        export_default_credentials: true
+        token_format: 'id_token'
+        workload_identity_provider: 'projects/620659927997/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+        service_account: 'github-deploy-sa@central-accord-456812-j6.iam.gserviceaccount.com'
+
+    - name: Set up Google Cloud CLI
+      uses: google-github-actions/setup-gcloud@v2
 
     - name: Build and Push Docker Image to Artifact Registry
       run: |
-        gcloud builds submit --tag gcr.io/central-accord-456812-j6/allert-api  # ✅ 이미지 경로 수정
+        gcloud builds submit --tag gcr.io/central-accord-456812-j6/allert-api
 
     - name: Deploy to Cloud Run
       run: |
