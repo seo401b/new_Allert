@@ -37,5 +37,5 @@ jobs:
           --image gcr.io/central-accord-456812-j6/allert-api \
           --platform managed \
           --region asia-northeast3 \
-          --allow-unauthenticated
+          --allow-unauthenticated \
           --set-env-vars "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}"
