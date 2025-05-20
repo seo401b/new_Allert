@@ -38,3 +38,4 @@ jobs:
           --platform managed \
           --region asia-northeast3 \
           --allow-unauthenticated
+          --set-env-vars "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}"
