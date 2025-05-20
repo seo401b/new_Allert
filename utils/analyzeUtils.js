@@ -7,6 +7,7 @@ const mime = require("mime-types");
 const XLSX = require("xlsx");
 const stringSimilarity = require("string-similarity");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { v4: uuidv4 } = require("uuid");
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -303,30 +304,30 @@ async function compareImagesToFindExactMatch(baseImagePath, candidates) {
 
 
 async function analyzeFullImage(imagePath, excelPath) {
-    const workbook = XLSX.readFile(excelPath);
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(sheet);
-    const productMap = await extractProductNamesFromImage(imagePath);
-    const results = [];
-  
-    for (const [productKey, names] of Object.entries(productMap)) {
+  const workbook = XLSX.readFile(excelPath);
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const data = XLSX.utils.sheet_to_json(sheet);
+  const productMap = await extractProductNamesFromImage(imagePath);
+
+  const results = await Promise.all(
+    Object.entries(productMap).map(async ([productKey, names]) => {
       const candidates = findRoughlySimilarProducts(names.한글, data);
       const refinedNames = await refineWithGemini(names.한글, candidates);
       const refinedCandidates = candidates.filter(c => refinedNames.includes(c.target));
       const uniqueCandidates = deduplicateByImageUrl(refinedCandidates);
       const finalMatch = await compareImagesToFindExactMatch(imagePath, uniqueCandidates);
-  
-      results.push({
+
+      return {
         inputName: names,
         match: finalMatch?.matched || null,
-        imageUrl: finalMatch?.imageUrl || null
-      });
-    }
-  
-    return results;
-  }
+        // imageUrl: finalMatch?.imageUrl || null
+      };
+    })
+  );
+
+  return results;
+}
   
   module.exports = { analyzeFullImage };
   
-  // 위에 네가 만든 다른 함수들(cleanUrl, prepareImageForGemini 등)은 이 파일에 그대로 복붙
   
